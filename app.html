@@ -17,7 +17,6 @@
 </head>
 <body class="view-home">
 
-  <!-- ============ HEADER ============ -->
   <header class="app-header" role="banner">
     <div class="app-brand">
       <svg class="brand-icon" viewBox="0 0 32 32" fill="none" aria-hidden="true">
@@ -43,7 +42,6 @@
     </div>
   </header>
 
-  <!-- ============ SEARCH BAR ============ -->
   <div class="search-bar-wrap" id="searchBarWrap" aria-hidden="true">
     <div class="search-bar">
       <svg class="search-icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -54,26 +52,22 @@
     </div>
   </div>
 
-  <!-- ============ MAIN (scrollable) ============ -->
   <main class="app-main" id="appMain">
 
-    <!-- ===== HOME / TALK VIEW ===== -->
     <section class="view view-panel" id="view-home" aria-label="Talk">
 
-      <!-- search results (only shown while searching) -->
       <div class="search-results-area" id="searchResultsArea" aria-live="polite" aria-label="Search results" style="display:none"></div>
 
       <div id="talkContent">
-        <!-- category nav tabs -->
+
         <nav class="cat-nav" id="catNav" role="navigation" aria-label="Word categories" style="display:none">
           <div class="cat-nav-scroll"></div>
         </nav>
-        <!-- symbol / category grid -->
+
         <div class="symbol-grid" id="symbolGrid" role="grid" aria-label="Communication symbols"></div>
       </div>
     </section>
 
-    <!-- ===== TYPE VIEW (text-based AAC) ===== -->
     <section class="view view-panel" id="view-type" aria-label="Type to speak" hidden>
       <div class="view-header">
         <h1 class="view-title">Type to Speak</h1>
@@ -94,7 +88,6 @@
       </div>
     </section>
 
-    <!-- ===== WORD BANKS VIEW ===== -->
     <section class="view view-panel" id="view-wordbanks" aria-label="Word Banks" hidden>
       <div class="view-header">
         <h1 class="view-title">Word Banks</h1>
@@ -129,7 +122,6 @@
       </div>
     </section>
 
-    <!-- ===== HISTORY VIEW ===== -->
     <section class="view view-panel" id="view-history" aria-label="History" hidden>
       <div class="view-header">
         <h1 class="view-title">History</h1>
@@ -138,7 +130,6 @@
       <div id="historyList" class="history-list" aria-live="polite"></div>
     </section>
 
-    <!-- ===== SETTINGS VIEW ===== -->
     <section class="view view-panel" id="view-settings" aria-label="Settings" hidden>
       <div class="view-header">
         <h1 class="view-title">Settings</h1>
@@ -235,7 +226,6 @@
 
   </main>
 
-  <!-- ============ SPEAK ACTION BAR (home only) ============ -->
   <div class="action-bar" id="actionBar" role="region" aria-label="Sentence and speak controls">
     <div class="predict-row" id="predictRow" role="group" aria-label="Word suggestions"></div>
     <div class="output-box" id="output" role="log" aria-label="Current sentence" aria-live="polite" tabindex="0">
@@ -269,7 +259,6 @@
     </div>
   </div>
 
-  <!-- ============ BOTTOM NAV (always visible) ============ -->
   <nav class="bottom-nav" id="bottomNav" role="navigation" aria-label="Main navigation">
     <button class="nav-tab active" data-view="home" aria-current="page" aria-label="Home — talk">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -303,7 +292,6 @@
     </button>
   </nav>
 
-  <!-- ============ MODAL ============ -->
   <div class="modal-overlay" id="modalOverlay" aria-hidden="true">
     <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
       <header class="modal-header">
@@ -315,6 +303,7 @@
     </div>
   </div>
 
-  <script src="script.js"></script>
+  <script src="script.js">
+</script>
 </body>
 </html>

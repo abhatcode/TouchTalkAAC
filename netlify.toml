@@ -1,21 +1,17 @@
-# Netlify configuration for TouchTalk
 
 [build]
   publish = "."
 
-# The service worker must always be revalidated so updates reach users.
 [[headers]]
   for = "/sw.js"
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
 
-# The manifest changes rarely but should revalidate too.
 [[headers]]
   for = "/manifest.json"
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
 
-# Hashed static assets can be cached hard (we don't hash yet, so keep modest).
 [[headers]]
   for = "/icons/*"
   [headers.values]

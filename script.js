@@ -1,8 +1,4 @@
-/* =============================================
-   TOUCHTALK — CORE APPLICATION LOGIC v2.2
-   ============================================= */
 
-// ---- STATE ----
 let currentText = '';
 let currentCategory = 'home';
 let currentView = 'home';
@@ -16,30 +12,26 @@ let toastTimer = null;
 let activeModalOnSave = null;
 let activationLockUntil = 0;
 
-// ---- CORE WORD BOARD ----
-// Positions are FIXED (LAMP motor-planning principle) — never reorder this array.
-// pos → Fitzgerald Key color: pronoun=yellow, verb=green, noun=orange, adj=blue,
-// prep=pink, question=purple, negation=red, adverb=brown, social=grey.
 const CORE_WORDS = [
-  // row 1
+
   { word: 'I', pos: 'pronoun' },      { word: 'want', pos: 'verb' },   { word: 'go', pos: 'verb' },     { word: 'more', pos: 'adverb' },  { word: 'good', pos: 'adj' },    { word: 'yes', pos: 'social' },
-  // row 2
+
   { word: 'you', pos: 'pronoun' },    { word: 'like', pos: 'verb' },   { word: 'come', pos: 'verb' },   { word: 'done', pos: 'adverb' },  { word: 'bad', pos: 'adj' },     { word: 'no', pos: 'negation' },
-  // row 3
+
   { word: 'it', pos: 'pronoun' },     { word: 'need', pos: 'verb' },   { word: 'stop', pos: 'negation' },{ word: 'again', pos: 'adverb' }, { word: 'big', pos: 'adj' },     { word: 'please', pos: 'social' },
-  // row 4
+
   { word: 'we', pos: 'pronoun' },     { word: 'help', pos: 'verb' },   { word: 'get', pos: 'verb' },    { word: 'now', pos: 'adverb' },   { word: 'little', pos: 'adj' },  { word: 'thank you', pos: 'social' },
-  // row 5
+
   { word: 'he', pos: 'pronoun' },     { word: 'eat', pos: 'verb' },    { word: 'put', pos: 'verb' },    { word: 'later', pos: 'adverb' }, { word: 'hot', pos: 'adj' },     { word: 'hi', pos: 'social' },
-  // row 6
+
   { word: 'she', pos: 'pronoun' },    { word: 'drink', pos: 'verb' },  { word: 'open', pos: 'verb' },   { word: 'in', pos: 'prep' },      { word: 'cold', pos: 'adj' },    { word: 'bye', pos: 'social' },
-  // row 7
+
   { word: 'they', pos: 'pronoun' },   { word: 'play', pos: 'verb' },   { word: 'look', pos: 'verb' },   { word: 'on', pos: 'prep' },      { word: 'fast', pos: 'adj' },    { word: 'what', pos: 'question' },
-  // row 8
+
   { word: 'this', pos: 'pronoun' },   { word: 'make', pos: 'verb' },   { word: 'see', pos: 'verb' },    { word: 'out', pos: 'prep' },     { word: 'slow', pos: 'adj' },    { word: 'where', pos: 'question' },
-  // row 9
+
   { word: 'that', pos: 'pronoun' },   { word: 'do', pos: 'verb' },     { word: 'give', pos: 'verb' },   { word: 'up', pos: 'prep' },      { word: 'hurt', pos: 'adj' },    { word: 'who', pos: 'question' },
-  // row 10
+
   { word: 'my', pos: 'pronoun' },     { word: 'feel', pos: 'verb' },   { word: 'turn', pos: 'verb' },   { word: 'down', pos: 'prep' },    { word: 'not', pos: 'negation' },{ word: 'why', pos: 'question' },
 ];
 
@@ -49,7 +41,6 @@ const FITZ_LEGEND = [
   { pos: 'negation', label: 'No/Stop' }, { pos: 'social', label: 'Social' },
 ];
 
-// ---- WORD PREDICTION (starter bigrams; the app also learns from use) ----
 const STARTER_BIGRAMS = {
   'i': ['want', 'need', 'like', 'feel', 'am', 'can'],
   'you': ['are', 'can', 'want', 'like', 'go'],
@@ -78,7 +69,6 @@ const STARTER_BIGRAMS = {
 };
 const SENTENCE_STARTERS = ['I', 'you', 'want', 'need', 'help', 'more'];
 
-// ---- DATA ----
 const categories = {
   feelings: [
     { word: 'happy', emoji: '😊', label: 'Happy' },
@@ -163,7 +153,6 @@ const categoryMeta = {
 
 const PROTECTED = ['feelings', 'needs', 'words', 'actions', 'people', 'quickPhrases'];
 
-// ---- BOOT ----
 window.addEventListener('load', () => {
   loadData();
   loadSettings();
@@ -188,9 +177,6 @@ function registerSW() {
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 
-/* =============================================
-   INSTALL (Add to Home Screen)
-   ============================================= */
 let deferredInstallPrompt = null;
 
 window.addEventListener('beforeinstallprompt', e => {
@@ -269,14 +255,11 @@ async function installApp() {
   });
 }
 
-/* =============================================
-   PERSISTENCE
-   ============================================= */
 function saveData() {
   try {
     localStorage.setItem('tt_data', JSON.stringify({ categories, categoryMeta }));
   } catch (e) {
-    // Most likely QuotaExceededError from photos/recordings
+
     showToast('⚠️ Storage is full — this change may not be saved. Delete unused photos or recordings.', 'error', 4000);
   }
 }
@@ -287,7 +270,7 @@ function loadData() {
     const d = JSON.parse(raw);
     if (d.categories) Object.assign(categories, d.categories);
     if (d.categoryMeta) Object.assign(categoryMeta, d.categoryMeta);
-    // 'core' is code-defined and must keep its meta even if an old backup overwrote it
+
     categoryMeta.core = { emoji: '🔑', label: 'Core', colorClass: 'card-words', catClass: '' };
     delete categories.core;
   } catch (e) {}
@@ -329,9 +312,6 @@ function loadBigrams() {
   } catch (e) { learnedBigrams = {}; }
 }
 
-/* =============================================
-   ACCESS SETTINGS (hold / debounce / size)
-   ============================================= */
 function applyAccessSettings(save) {
   const sizes = { small: 110, medium: 130, large: 160, xl: 200 };
   document.documentElement.style.setProperty('--symbol-min', (sizes[accessSettings.gridSize] || 130) + 'px');
@@ -346,7 +326,6 @@ function applyAccessSettings(save) {
   if (debSel) debSel.value = String(accessSettings.debounceMs);
   if (spkTog) spkTog.setAttribute('aria-checked', String(accessSettings.speakEachWord));
 
-  // Core board columns: fewer, bigger targets on large sizes
   const grid = document.getElementById('symbolGrid');
   if (grid && grid.classList.contains('core-grid')) {
     grid.classList.toggle('cols-4', accessSettings.gridSize === 'large' || accessSettings.gridSize === 'xl');
@@ -359,11 +338,6 @@ function toggleSpeakEachWord() {
   applyAccessSettings(true);
 }
 
-/**
- * Activation wrapper for communication buttons.
- * Honors hold-to-activate (tremor protection) and debounce (double-tap protection).
- * Keyboard activation (e.detail === 0) always works regardless of hold setting.
- */
 function bindActivate(btn, fn) {
   let holdTimer = null;
   let didHoldActivate = false;
@@ -415,15 +389,12 @@ function bindActivate(btn, fn) {
   });
 
   btn.addEventListener('click', e => {
-    if (didHoldActivate) return; 
-    if (accessSettings.holdMs > 0 && e.detail > 0) return; 
+    if (didHoldActivate) return;
+    if (accessSettings.holdMs > 0 && e.detail > 0) return;
     trigger();
   });
 }
 
-/* =============================================
-   VIEW ROUTING (bottom nav)
-   ============================================= */
 function initNav() {
   document.querySelectorAll('.nav-tab').forEach(tab => {
     tab.addEventListener('click', () => switchView(tab.getAttribute('data-view')));
@@ -448,9 +419,6 @@ function switchView(view) {
   if (main) main.scrollTop = 0;
 }
 
-/* =============================================
-   OUTPUT
-   ============================================= */
 function getOutputEl() { return document.getElementById('output'); }
 function getPlaceholderEl() { return document.getElementById('outputPlaceholder'); }
 
@@ -493,23 +461,20 @@ function backspaceWord() {
 }
 function clearText() { setOutputText(''); }
 
-/* =============================================
-   WORD PREDICTION
-   ============================================= */
 function learnFromSentence(text) {
   const words = text.toLowerCase().trim().split(/\s+/).filter(w => w.length > 0 && w.length < 20);
   for (let i = 0; i < words.length - 1; i++) {
     const a = words[i], b = words[i + 1];
     if (!learnedBigrams[a]) learnedBigrams[a] = {};
     learnedBigrams[a][b] = (learnedBigrams[a][b] || 0) + 1;
-    // cap each word's follower list
+
     const entries = Object.entries(learnedBigrams[a]);
     if (entries.length > 8) {
       entries.sort((x, y) => y[1] - x[1]);
       learnedBigrams[a] = Object.fromEntries(entries.slice(0, 8));
     }
   }
-  // cap total vocabulary
+
   const keys = Object.keys(learnedBigrams);
   if (keys.length > 300) delete learnedBigrams[keys[0]];
   saveBigrams();
@@ -546,9 +511,6 @@ function renderPredictions() {
   });
 }
 
-/* =============================================
-   SPEECH
-   ============================================= */
 function getVoice() {
   const voices = speechSynthesis.getVoices();
   if (voiceSettings.voiceIndex >= 0 && voices[voiceSettings.voiceIndex]) return voices[voiceSettings.voiceIndex];
@@ -576,7 +538,6 @@ function speakText() {
   if (!text) { showToast('Nothing to speak yet'); return; }
   const btn = document.querySelector('.speak-btn');
 
-  // If the whole sentence matches a saved recording (e.g. a quick phrase), play the human voice
   const custom = findCustomAudio(text);
   if (custom) {
     if (btn) btn.classList.add('speaking');
@@ -608,9 +569,6 @@ function emergency() {
   showToast('🆘 Emergency alert spoken', 'error');
 }
 
-/* =============================================
-   VOICES (settings)
-   ============================================= */
 function initVoices() {
   const populate = () => {
     const sel = document.getElementById('voiceSelect');
@@ -629,9 +587,6 @@ function initVoices() {
   });
 }
 
-/* =============================================
-   TYPE VIEW (text-based AAC)
-   ============================================= */
 function initTypeView() {
   const area = document.getElementById('typeArea');
   area?.addEventListener('input', renderTypePredictions);
@@ -656,7 +611,7 @@ function renderTypePredictions() {
   let words = [];
   const endsWithSpace = /\s$/.test(text) || text.trim() === '';
   if (!endsWithSpace) {
-    // mid-word: offer completions
+
     const partial = text.trim().split(/\s+/).pop().toLowerCase();
     if (partial.length >= 2) {
       words = [...buildVocab()].filter(w => w.startsWith(partial) && w !== partial).slice(0, 5);
@@ -673,7 +628,7 @@ function renderTypePredictions() {
     chip.setAttribute('aria-label', `Insert word ${w}`);
     bindActivate(chip, () => {
       if (!endsWithSpace && text.trim()) {
-        // replace partial word with completion
+
         const parts = area.value.split(/\s+/);
         parts.pop();
         area.value = (parts.join(' ') + ' ' + w).trim() + ' ';
@@ -718,9 +673,6 @@ function typeSaveAsPhrase() {
   }, 350);
 }
 
-/* =============================================
-   HOME / TALK RENDERING
-   ============================================= */
 function animateGrid() {
   const grid = document.getElementById('symbolGrid');
   if (!grid) return;
@@ -787,8 +739,6 @@ function showCategory(key) {
   animateGrid();
 }
 
-/* Core board: fixed positions, Fitzgerald colors, no stagger animation
-   (stable, instant render supports motor planning). */
 function renderCoreBoard() {
   const grid = document.getElementById('symbolGrid');
   if (!grid) return;
@@ -796,7 +746,6 @@ function renderCoreBoard() {
   grid.className = 'core-grid' + (bigButtons ? ' cols-4' : '');
   grid.innerHTML = '';
 
-  // legend
   const legend = document.createElement('div');
   legend.className = 'fitz-legend';
   legend.style.gridColumn = '1 / -1';
@@ -855,9 +804,6 @@ function renderCategoryNav(activeCat) {
   }, 50);
 }
 
-/* =============================================
-   SEARCH
-   ============================================= */
 function initSearch() {
   const toggle = document.getElementById('searchToggle');
   const wrap = document.getElementById('searchBarWrap');
@@ -948,9 +894,6 @@ function renderSearchResults(q) {
   area.appendChild(gridEl);
 }
 
-/* =============================================
-   HISTORY
-   ============================================= */
 function addToHistory(text) {
   if (!text) return;
   history = history.filter(h => h !== text);
@@ -995,9 +938,6 @@ function renderHistory() {
   list.appendChild(clearBtn);
 }
 
-/* =============================================
-   SETTINGS
-   ============================================= */
 function initSettings() {
   document.getElementById('voiceSpeed')?.addEventListener('input', e => {
     voiceSettings.speed = parseFloat(e.target.value); updateSliderLabels(); saveSettings();
@@ -1030,9 +970,6 @@ function updateSliderLabels() {
   if (pv) pv.textContent = `${voiceSettings.pitch.toFixed(2)}×`;
 }
 
-/* =============================================
-   BACKUP / RESTORE
-   ============================================= */
 function initBackup() {
   document.getElementById('importFile')?.addEventListener('change', e => {
     const file = e.target.files[0];
@@ -1097,9 +1034,6 @@ function exportBackup() {
   showToast('💾 Backup downloaded', 'success');
 }
 
-/* =============================================
-   DARK MODE
-   ============================================= */
 function toggleDarkMode() { applyDarkMode(!isDarkMode, true); }
 function applyDarkMode(on, save) {
   isDarkMode = on;
@@ -1115,9 +1049,6 @@ function applyDarkMode(on, save) {
   if (save) saveSettings();
 }
 
-/* =============================================
-   TOAST
-   ============================================= */
 function showToast(msg, type = '', duration = 2200) {
   let el = document.getElementById('appToast');
   if (!el) {
@@ -1135,9 +1066,6 @@ function showToast(msg, type = '', duration = 2200) {
   toastTimer = setTimeout(() => el.classList.remove('show'), duration);
 }
 
-/* =============================================
-   MODAL SYSTEM
-   ============================================= */
 function initModal() {
   document.getElementById('modalClose')?.addEventListener('click', closeModal);
   document.getElementById('modalOverlay')?.addEventListener('click', e => {
@@ -1212,9 +1140,7 @@ function closeModal() {
   overlay.setAttribute('aria-hidden', 'true');
   activeModalOnSave = null;
 }
-/* =============================================
-   VOICE RECORDING (custom pronunciations)
-   ============================================= */
+
 let activeRecorder = null;
 let activeRecStream = null;
 let recAutoStop = null;
@@ -1230,7 +1156,6 @@ function playAudio(src, onEnd) {
   } catch (e) { if (onEnd) onEnd(); }
 }
 
-/* Exact-match lookup: does any saved item have a recording for this text? */
 function findCustomAudio(text) {
   const t = text.trim().toLowerCase();
   if (!t) return null;
@@ -1272,7 +1197,7 @@ function wireVoiceRecorder(p, setAudio, getAudio) {
   showSaved(!!getAudio());
 
   recBtn.addEventListener('click', async () => {
-    // Second tap while recording = stop
+
     if (activeRecorder && activeRecorder.state === 'recording') { activeRecorder.stop(); return; }
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || typeof MediaRecorder === 'undefined') {
       showToast('Recording is not supported in this browser', 'error');
@@ -1344,9 +1269,6 @@ function wireUpload(boxId, fileId, onLoad) {
   });
 }
 
-/* =============================================
-   CUSTOMIZE — ADD CATEGORY
-   ============================================= */
 let pendingCategoryImage = null;
 let pendingCategoryAudio = null;
 function openAddCategoryModal() {
@@ -1400,9 +1322,6 @@ function openAddCategoryModal() {
   });
 }
 
-/* =============================================
-   CUSTOMIZE — ADD SYMBOL
-   ============================================= */
 let pendingSymbolImage = null;
 let pendingSymbolAudio = null;
 function openAddSymbolModal() {
@@ -1465,9 +1384,6 @@ function openAddSymbolModal() {
   });
 }
 
-/* =============================================
-   CUSTOMIZE — ADD QUICK PHRASE
-   ============================================= */
 let pendingPhraseImage = null;
 let pendingPhraseAudio = null;
 function openAddPhraseModal() {
@@ -1524,9 +1440,6 @@ function openAddPhraseModal() {
   });
 }
 
-/* =============================================
-   CUSTOMIZE — DELETE CATEGORY
-   ============================================= */
 function openDeleteCategoryModal() {
   openModal({ title: 'Delete Category', body: buildDeleteCategoryBody() });
 }
@@ -1562,9 +1475,6 @@ function confirmDeleteCategory(key) {
   if (currentView === 'home') renderHome();
 }
 
-/* =============================================
-   CUSTOMIZE — DELETE SYMBOL
-   ============================================= */
 function openDeleteSymbolModal() {
   const opts = Object.keys(categories).map(k => `<option value="${k}">${escapeHtml(categoryMeta[k]?.label || k)}</option>`).join('');
   openModal({
@@ -1620,9 +1530,6 @@ function confirmDeleteSymbol(key, idx) {
   if (currentView === 'home') renderHome();
 }
 
-/* =============================================
-   UTIL
-   ============================================= */
 function escapeHtml(s) {
   return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }

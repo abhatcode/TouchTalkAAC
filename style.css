@@ -1,63 +1,50 @@
-/* =============================================
-   TOUCHTALK — DESIGN SYSTEM v2.1
-   ============================================= */
 
 :root {
-  /* Brand */
+
   --primary:        #2563EB;
   --primary-light:  #EEF2FF;
   --primary-dark:   #1D4ED8;
 
-  /* Surfaces — high contrast (WCAG AA) */
   --bg:             #FFFFFF;
   --surface:        #FFFFFF;
   --surface-2:      #F1F5F9;
   --border:         #CBD5E1;
 
-  /* Text — near-black on white = 16:1 contrast */
   --text-1:         #0F172A;
   --text-2:         #475569;
   --text-inv:       #FFFFFF;
 
-  /* Semantic */
   --speak:          #047857;
   --speak-dark:     #065F46;
   --danger:         #DC2626;
   --danger-dark:    #B91C1C;
   --emergency:      #DC2626;
 
-  /* Category colours */
   --cat-feelings:#DB2777; --cat-needs:#C2410C; --cat-words:#1D4ED8;
   --cat-actions:#047857; --cat-people:#6D28D9; --cat-quickphrases:#C2410C;
   --cat-custom:#0E7490;
 
-  /* Layout heights (dp-equivalent) */
   --header-h:   56px;
   --search-h:   60px;
   --nav-h:      68px;
-  --actionbar-h: 220px;   /* prediction row + output + action row, portrait */
-  --symbol-min: 130px;    /* min symbol button width — user adjustable */
-  --hold-dur: 0ms;        /* hold-to-activate duration — user adjustable */
+  --actionbar-h: 220px;
+  --symbol-min: 130px;
+  --hold-dur: 0ms;
 
-  /* Radius */
   --r-sm: 12px; --r-md: 16px; --r-lg: 22px; --r-xl: 28px;
 
-  /* Motion */
   --ease-out:    cubic-bezier(0.22, 1, 0.36, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --d-fast: 140ms; --d-med: 230ms; --d-slow: 360ms;
 
-  /* Shadows */
   --sh-sm: 0 1px 3px rgba(0,0,0,.10), 0 1px 2px rgba(0,0,0,.06);
   --sh-md: 0 4px 12px rgba(0,0,0,.12), 0 2px 4px rgba(0,0,0,.06);
   --sh-lg: 0 12px 32px rgba(0,0,0,.16), 0 4px 8px rgba(0,0,0,.08);
 
-  /* Safe-area insets (notches) */
   --safe-top:    env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-/* ---- DARK MODE (#1a1a1a bg / #fff text) ---- */
 .dark {
   --bg:            #1A1A1A;
   --surface:       #242424;
@@ -71,7 +58,6 @@
   --sh-lg: 0 12px 32px rgba(0,0,0,.6);
 }
 
-/* ---- RESET ---- */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { height: 100%; -webkit-text-size-adjust: 100%; }
 body {
@@ -80,16 +66,13 @@ body {
   color: var(--text-1);
   height: 100%;
   overflow: hidden;
-  font-size: 16px;            /* readable base */
+  font-size: 16px;
   line-height: 1.4;
   transition: background var(--d-med) var(--ease-out), color var(--d-med) var(--ease-out);
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 }
 
-/* =============================================
-   HEADER
-   ============================================= */
 .app-header {
   position: fixed;
   top: 0; left: 0; right: 0;
@@ -111,7 +94,7 @@ body {
 .header-actions { display: flex; align-items: center; gap: 2px; }
 
 .icon-btn {
-  width: 48px; height: 48px;      /* 48dp target */
+  width: 48px; height: 48px;
   border: none; background: transparent;
   border-radius: var(--r-sm);
   cursor: pointer;
@@ -125,9 +108,6 @@ body {
 .icon-btn:active { transform: scale(0.88); }
 .icon-btn.active { color: var(--primary); background: var(--primary-light); }
 
-/* =============================================
-   SEARCH BAR
-   ============================================= */
 .search-bar-wrap {
   position: fixed;
   top: calc(var(--header-h) + var(--safe-top));
@@ -153,9 +133,6 @@ body {
 }
 .search-clear-btn.visible { display: flex; }
 
-/* =============================================
-   MAIN — scroll region between header & bottom UI
-   ============================================= */
 .app-main {
   position: fixed;
   top: calc(var(--header-h) + var(--safe-top));
@@ -167,9 +144,9 @@ body {
   padding: 16px;
   transition: top var(--d-med) var(--ease-out), bottom var(--d-med) var(--ease-out);
 }
-/* When search open, push main down */
+
 body.search-open .app-main { top: calc(var(--header-h) + var(--search-h) + var(--safe-top)); }
-/* When on Home view, reserve room for the action bar above nav */
+
 body.view-home .app-main { bottom: calc(var(--nav-h) + var(--actionbar-h) + var(--safe-bottom)); }
 
 .view { animation: viewIn var(--d-med) var(--ease-out); }
@@ -180,9 +157,6 @@ body.view-home .app-main { bottom: calc(var(--nav-h) + var(--actionbar-h) + var(
 .view-title { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; color: var(--text-1); }
 .view-sub { font-size: 15px; color: var(--text-2); margin-top: 4px; }
 
-/* =============================================
-   CATEGORY NAV TABS  (issue #1 — now bold & visible)
-   ============================================= */
 .cat-nav { margin-bottom: 14px; }
 .cat-nav-scroll {
   display: flex; gap: 10px; overflow-x: auto;
@@ -207,9 +181,6 @@ body.view-home .app-main { bottom: calc(var(--nav-h) + var(--actionbar-h) + var(
 .cat-tab.active { background: var(--primary); border-color: var(--primary); color: #fff; box-shadow: var(--sh-md); }
 .cat-tab:hover:not(.active) { border-color: var(--primary); color: var(--primary); }
 
-/* =============================================
-   SYMBOL GRID
-   ============================================= */
 .symbol-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(var(--symbol-min), 1fr));
@@ -258,9 +229,6 @@ body.view-home .app-main { bottom: calc(var(--nav-h) + var(--actionbar-h) + var(
 .cat-quickphrases .symbol-btn{--cat-color:var(--cat-quickphrases)}
 .cat-custom .symbol-btn{--cat-color:var(--cat-custom)}
 
-/* =============================================
-   CATEGORY CARDS (home overview)
-   ============================================= */
 .category-card {
   border: none; border-radius: var(--r-lg);
   padding: 22px 14px 18px; cursor: pointer;
@@ -284,9 +252,6 @@ body.view-home .app-main { bottom: calc(var(--nav-h) + var(--actionbar-h) + var(
 .card-quickphrases{background:linear-gradient(135deg,#C2410C,#CA8A04);color:#fff}
 .card-custom{background:linear-gradient(135deg,#0E7490,#1D4ED8);color:#fff}
 
-/* =============================================
-   WORD BANKS — manage cards
-   ============================================= */
 .manage-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -308,9 +273,6 @@ body.view-home .app-main { bottom: calc(var(--nav-h) + var(--actionbar-h) + var(
 .manage-label { font-size: 17px; font-weight: 800; color: var(--text-1); }
 .manage-desc { font-size: 13px; color: var(--text-2); line-height: 1.3; }
 
-/* =============================================
-   HISTORY
-   ============================================= */
 .history-list { display: flex; flex-direction: column; gap: 10px; }
 .history-empty { text-align: center; color: var(--text-2); padding: 48px 16px; font-size: 16px; }
 .history-row {
@@ -344,9 +306,6 @@ body.view-home .app-main { bottom: calc(var(--nav-h) + var(--actionbar-h) + var(
 }
 .history-clear-btn:hover { background: var(--surface-2); }
 
-/* =============================================
-   SETTINGS (full view)
-   ============================================= */
 .settings-card {
   background: var(--surface);
   border: 2px solid var(--border);
@@ -395,7 +354,6 @@ body.view-home .app-main { bottom: calc(var(--nav-h) + var(--actionbar-h) + var(
 .settings-link { font-size: 15px; font-weight: 700; color: var(--primary); text-decoration: none; }
 .settings-hint { font-size: 14px; color: var(--text-2); line-height: 1.5; margin-bottom: 12px; }
 
-/* Toggle switch */
 .toggle-switch {
   width: 60px; height: 34px; border-radius: 17px;
   background: var(--border); border: none; cursor: pointer; position: relative;
@@ -409,9 +367,6 @@ body.view-home .app-main { bottom: calc(var(--nav-h) + var(--actionbar-h) + var(
 }
 .toggle-switch[aria-checked="true"] .toggle-knob { transform: translateX(26px); }
 
-/* =============================================
-   SEARCH RESULTS
-   ============================================= */
 .search-results-area { margin-bottom: 12px; }
 .search-results-header { font-size: 13px; font-weight: 700; color: var(--text-2); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 10px; }
 .search-results-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
@@ -428,9 +383,6 @@ body.view-home .app-main { bottom: calc(var(--nav-h) + var(--actionbar-h) + var(
 .word-chip-label { font-size: 14px; font-weight: 700; color: var(--text-1); }
 .word-chip-cat { font-size: 11px; color: var(--text-2); font-weight: 600; }
 
-/* =============================================
-   ACTION BAR (home only) — output + speak row
-   ============================================= */
 .action-bar {
   position: fixed;
   left: 0; right: 0;
@@ -444,7 +396,7 @@ body.view-home .app-main { bottom: calc(var(--nav-h) + var(--actionbar-h) + var(
   box-shadow: 0 -4px 16px rgba(0,0,0,.08);
   transition: transform var(--d-med) var(--ease-out), background var(--d-med) var(--ease-out);
 }
-/* hidden on non-home views */
+
 body:not(.view-home) .action-bar { transform: translateY(120%); pointer-events: none; }
 
 .output-box {
@@ -485,9 +437,6 @@ body:not(.view-home) .action-bar { transform: translateY(120%); pointer-events: 
 .speak-btn.speaking { background: #0369A1; animation: speakPulse .8s ease-in-out infinite; }
 @keyframes speakPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.02)} }
 
-/* =============================================
-   BOTTOM NAV (always visible, sticky)
-   ============================================= */
 .bottom-nav {
   position: fixed;
   bottom: 0; left: 0; right: 0;
@@ -503,7 +452,7 @@ body:not(.view-home) .action-bar { transform: translateY(120%); pointer-events: 
 .nav-tab {
   flex: 1;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
-  min-height: 56px;            /* 56dp */
+  min-height: 56px;
   border: none; background: transparent; cursor: pointer; font-family: inherit;
   color: var(--text-2);
   position: relative;
@@ -521,9 +470,6 @@ body:not(.view-home) .action-bar { transform: translateY(120%); pointer-events: 
 .nav-tab.active::after { transform: translateX(-50%) scaleX(1); }
 .nav-tab:active { transform: scale(0.95); }
 
-/* =============================================
-   MODAL  (full-screen mobile / centered tablet)
-   ============================================= */
 .modal-overlay {
   position: fixed; inset: 0;
   background: rgba(0,0,0,.5);
@@ -537,7 +483,7 @@ body:not(.view-home) .action-bar { transform: translateY(120%); pointer-events: 
 
 .modal {
   background: var(--surface);
-  width: 100%; height: 100%;            /* MOBILE: full screen */
+  width: 100%; height: 100%;
   display: flex; flex-direction: column;
   transform: translateY(100%);
   transition: transform var(--d-slow) var(--ease-out), background var(--d-med) var(--ease-out);
@@ -575,7 +521,6 @@ body:not(.view-home) .action-bar { transform: translateY(120%); pointer-events: 
   background: var(--surface);
 }
 
-/* form fields inside modal */
 .form-field { margin-bottom: 20px; }
 .form-field > label {
   display: block; font-size: 14px; font-weight: 700; color: var(--text-2);
@@ -584,7 +529,7 @@ body:not(.view-home) .action-bar { transform: translateY(120%); pointer-events: 
 .form-field input[type="text"],
 .form-field select {
   width: 100%; min-height: 54px;
-  padding: 0 16px; font-size: 17px;        /* ≥16px: no iOS zoom */
+  padding: 0 16px; font-size: 17px;
   border: 2px solid var(--border); border-radius: var(--r-sm);
   background: var(--surface-2); color: var(--text-1); font-family: inherit;
   transition: border-color var(--d-fast), box-shadow var(--d-fast);
@@ -609,10 +554,8 @@ body:not(.view-home) .action-bar { transform: translateY(120%); pointer-events: 
 .or-divider { display: flex; align-items: center; gap: 10px; margin: 14px 0; color: var(--text-2); font-size: 13px; font-weight: 600; }
 .or-divider::before, .or-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
-/* two-column form section (tablet & landscape) */
 .form-cols { display: block; }
 
-/* delete list inside modal */
 .delete-list { display: flex; flex-direction: column; gap: 10px; }
 .delete-row {
   display: flex; align-items: center; justify-content: space-between; gap: 10px;
@@ -632,7 +575,6 @@ body:not(.view-home) .action-bar { transform: translateY(120%); pointer-events: 
 .delete-row-btn:disabled { background: var(--surface-2); color: var(--text-2); cursor: not-allowed; border: 2px solid var(--border); }
 .dark .delete-row-btn { background: #3A1515; color: #FCA5A5; }
 
-/* footer buttons */
 .btn-cancel, .btn-save {
   min-height: 54px; border-radius: var(--r-md);
   font-size: 17px; font-weight: 700; cursor: pointer; font-family: inherit;
@@ -653,9 +595,6 @@ body:not(.view-home) .action-bar { transform: translateY(120%); pointer-events: 
 .btn-save.loading .spinner { display: inline-block; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* =============================================
-   TOAST
-   ============================================= */
 .toast {
   position: fixed;
   bottom: calc(var(--nav-h) + var(--safe-bottom) + 16px);
@@ -671,16 +610,10 @@ body:not(.view-home) .action-bar { transform: translateY(120%); pointer-events: 
 .toast.error { background: var(--danger); color: #fff; }
 .toast.success { background: var(--speak); color: #fff; }
 
-/* =============================================
-   RESPONSIVE BREAKPOINTS
-   ============================================= */
-
-/* --- 480px: roomier gaps --- */
 @media (min-width: 480px) {
   .symbol-grid { gap: 13px; }
 }
 
-/* --- 600px: TABLET — centered modals, wider layout --- */
 @media (min-width: 600px) {
   .modal-overlay { align-items: center; padding: 24px; }
   .modal {
@@ -698,31 +631,25 @@ body:not(.view-home) .action-bar { transform: translateY(120%); pointer-events: 
   .app-main { padding: 20px 24px; }
 }
 
-/* --- 768px: tablet content max-width & two-column forms --- */
 @media (min-width: 768px) {
-  /* Nav/action stay full-width; inner views are centered via max-width */
+
   .view-panel { max-width: 880px; margin: 0 auto; }
   .action-bar { padding-left: max(14px, calc((100% - 880px) / 2)); padding-right: max(14px, calc((100% - 880px) / 2)); }
-  /* Two-column form layout on wide screens */
+
   .form-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
   .form-cols .form-field { margin-bottom: 16px; }
 }
 
-/* --- 1024px: large tablet / desktop --- */
 @media (min-width: 1024px) {
   .modal { max-width: 720px; }
   .manage-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
 }
 
-/* =============================================
-   ORIENTATION — LANDSCAPE
-   ============================================= */
 @media (orientation: landscape) and (max-height: 600px) {
-  /* Shrink fixed chrome so the grid has room */
+
   :root { --actionbar-h: 92px; --nav-h: 56px; }
   .action-bar .predict-row { display: none; }
 
-  /* Action bar becomes a single horizontal row: output | controls */
   .action-bar { flex-direction: row; align-items: stretch; gap: 10px; padding: 8px 12px; }
   .output-box { flex: 1; }
   .action-row { height: auto; flex: 0 0 auto; align-items: stretch; }
@@ -730,11 +657,9 @@ body:not(.view-home) .action-bar { transform: translateY(120%); pointer-events: 
   .emergency-btn, .util-btn { flex: 0 0 56px; }
   .speak-btn { flex: 0 0 120px; }
 
-  /* Nav labels stay but tighter */
   .nav-tab { flex-direction: row; gap: 8px; }
   .nav-tab svg { width: 22px; height: 22px; }
 
-  /* Landscape modal: capped width, centered, two-column body */
   .modal-overlay { align-items: center; padding: 16px; }
   .modal { width: 90%; max-width: 760px; height: auto; max-height: 92vh; border-radius: var(--r-xl); transform: translateY(20px) scale(.97); }
   .modal-overlay.open .modal { transform: none; }
@@ -744,9 +669,6 @@ body:not(.view-home) .action-bar { transform: translateY(120%); pointer-events: 
   .form-cols .form-field { margin-bottom: 14px; }
 }
 
-/* =============================================
-   ACCESSIBILITY
-   ============================================= */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: .001ms !important; animation-iteration-count: 1 !important;
@@ -756,16 +678,12 @@ body:not(.view-home) .action-bar { transform: translateY(120%); pointer-events: 
 :focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; border-radius: 6px; }
 .dark :focus-visible { outline-color: #60A5FA; }
 
-/* High-contrast mode honoring OS setting */
 @media (prefers-contrast: more) {
   :root { --border: #000000; --text-2: #000000; }
   .dark { --border: #FFFFFF; --text-2: #FFFFFF; }
   .symbol-btn, .manage-card, .cat-tab { border-width: 3px; }
 }
 
-/* =============================================
-   v2.2 — CORE WORD BOARD (Fitzgerald Key colors)
-   ============================================= */
 .core-grid {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
@@ -794,7 +712,6 @@ body:not(.view-home) .action-bar { transform: translateY(120%); pointer-events: 
 .core-btn:active { transform: scale(0.92); }
 @media (min-width: 600px) { .core-btn { min-height: 68px; font-size: 19px; } }
 
-/* Fitzgerald Key — light mode */
 .fitz-pronoun  { background: #FDE68A; color: #713F12; }
 .fitz-verb     { background: #BBF7D0; color: #14532D; }
 .fitz-noun     { background: #FED7AA; color: #7C2D12; }
@@ -805,7 +722,6 @@ body:not(.view-home) .action-bar { transform: translateY(120%); pointer-events: 
 .fitz-adverb   { background: #EADBC8; color: #713F12; }
 .fitz-social   { background: #E2E8F0; color: #1E293B; }
 
-/* Fitzgerald Key — dark mode (same hue, dark bg, light text) */
 .dark .fitz-pronoun  { background: #574A12; color: #FDE68A; border-color: rgba(255,255,255,.14); }
 .dark .fitz-verb     { background: #14432B; color: #BBF7D0; border-color: rgba(255,255,255,.14); }
 .dark .fitz-noun     { background: #59300F; color: #FED7AA; border-color: rgba(255,255,255,.14); }
@@ -816,7 +732,6 @@ body:not(.view-home) .action-bar { transform: translateY(120%); pointer-events: 
 .dark .fitz-adverb   { background: #4A3A24; color: #EADBC8; border-color: rgba(255,255,255,.14); }
 .dark .fitz-social   { background: #37404E; color: #E2E8F0; border-color: rgba(255,255,255,.14); }
 
-/* Fitzgerald legend */
 .fitz-legend {
   display: flex; flex-wrap: wrap; gap: 6px 12px;
   margin-bottom: 10px; padding: 2px;
@@ -830,9 +745,6 @@ body:not(.view-home) .action-bar { transform: translateY(120%); pointer-events: 
   border: 1px solid rgba(0,0,0,.15);
 }
 
-/* =============================================
-   v2.2 — WORD PREDICTION
-   ============================================= */
 .predict-row {
   display: flex; gap: 8px;
   overflow-x: auto; scrollbar-width: none;
@@ -859,9 +771,6 @@ body:not(.view-home) .action-bar { transform: translateY(120%); pointer-events: 
 .dark .predict-chip { background: #1E3358; }
 .dark .predict-chip:hover { background: var(--primary); }
 
-/* =============================================
-   v2.2 — TYPE VIEW
-   ============================================= */
 .type-area {
   width: 100%;
   min-height: 140px;
@@ -905,9 +814,6 @@ body:not(.view-home) .action-bar { transform: translateY(120%); pointer-events: 
   .type-area { min-height: 90px; }
 }
 
-/* =============================================
-   v2.2 — HOLD-TO-ACTIVATE FEEDBACK
-   ============================================= */
 .holding { transform: scale(0.95) !important; }
 .holding::before {
   content: '' !important;
@@ -921,18 +827,12 @@ body:not(.view-home) .action-bar { transform: translateY(120%); pointer-events: 
 }
 @keyframes holdFill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 
-/* =============================================
-   v2.2 — UTILITIES
-   ============================================= */
 .sr-only {
   position: absolute; width: 1px; height: 1px;
   padding: 0; margin: -1px; overflow: hidden;
   clip: rect(0,0,0,0); white-space: nowrap; border: 0;
 }
 
-/* =============================================
-   v2.3 — VOICE RECORDING
-   ============================================= */
 .rec-hint {
   font-size: 13px;
   color: var(--text-2);
@@ -963,7 +863,7 @@ body:not(.view-home) .action-bar { transform: translateY(120%); pointer-events: 
   color: #fff;
   animation: recBreathe 2s ease-in-out infinite;
 }
-/* slow shadow breathe — no flashing (photosensitivity-safe) */
+
 @keyframes recBreathe {
   0%, 100% { box-shadow: 0 0 0 0 rgba(220,38,38,.35); }
   50%      { box-shadow: 0 0 0 8px rgba(220,38,38,0); }
