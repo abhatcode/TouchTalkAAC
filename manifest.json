@@ -1,0 +1,30 @@
+{
+  "name": "TouchTalk AAC",
+  "short_name": "TouchTalk",
+  "description": "A free AAC app. Tap words to build a message and have it spoken aloud.",
+  "id": "/",
+  "scope": "/",
+  "start_url": "/app.html",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#F2F5F1",
+  "theme_color": "#F2F5F1",
+  "categories": ["medical", "health", "accessibility"],
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "lang": "en-US",
+  "dir": "ltr"
+}

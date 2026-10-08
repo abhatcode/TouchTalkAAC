@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="TouchTalk is a free AAC app. Tap words to build a message and the device says it out loud. Works in the browser, with no account.">
+  <meta name="theme-color" content="#F2F5F1">
+  <title>TouchTalk: a free AAC app</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="preload" href="fonts/lexend-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <style>
+@font-face {
+      font-family: 'Lexend';
+      font-style: normal; font-weight: 300 800; font-display: swap;
+      src: url('fonts/lexend-latin.woff2') format('woff2');
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+    @font-face {
+      font-family: 'Lexend';
+      font-style: normal; font-weight: 300 800; font-display: swap;
+      src: url('fonts/lexend-latin-ext.woff2') format('woff2');
+      unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+    }
+    :root {
+      --paper: #F2F5F1;
+      --paper-2: #E3EAE3;
+      --cell: #FFFFFF;
+      --ink: #14311C;
+      --slate: #4A5E50;
+      --rule: #C6D0C7;
+      --focus: #FFBF1F;
+      --primary: #296339;
+      --primary-hover: #14311C;
+      --edge: #778A7A;
+      --r-btn: 12px;
+      --r-box: 16px;
+      --font: 'Lexend', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+    body {
+      font-family: var(--font);
+      font-size: 19px;
+      line-height: 1.6;
+      letter-spacing: 0;
+      background: var(--paper);
+      color: var(--ink);
+    }
+    button { font: inherit; letter-spacing: inherit; color: inherit; cursor: pointer; }
+    a { color: var(--ink); text-underline-offset: 3px; }
+    :focus { outline: none; }
+    :focus-visible { outline: 4px solid var(--focus); outline-offset: 2px; box-shadow: 0 0 0 2px var(--ink); border-radius: 4px; }
+    .i { width: 24px; height: 24px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+
+    /* header */
+    .site-head { border-bottom: 1px solid var(--rule); }
+    .site-head .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 72px; }
+    .brand { display: flex; align-items: center; gap: 10px; font-size: 22px; font-weight: 700; text-decoration: none; }
+    .brand img { width: 36px; height: 36px; object-fit: contain; }
+    .site-nav { display: flex; align-items: center; gap: 24px; }
+    .site-nav a:not(.btn) { font-size: 17px; font-weight: 600; text-decoration: none; }
+    .site-nav a:not(.btn):hover { text-decoration: underline; }
+    @media (max-width: 680px) { .site-nav a:not(.btn) { display: none; } }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+      min-height: 56px; padding: 0 24px;
+      border-radius: var(--r-btn);
+      font-size: 18px; font-weight: 700; text-decoration: none;
+      border: 2px solid var(--ink);
+    }
+    .btn-solid { background: var(--primary); color: #fff; }
+    .btn-solid:hover { background: var(--primary-hover); }
+    .btn-line { background: var(--cell); color: var(--ink); border-width: 1.5px; }
+    .btn-line:hover { background: var(--paper-2); }
+    .site-head .btn { min-height: 48px; padding: 0 18px; font-size: 17px; }
+
+    /* hero */
+    .hero { padding: 64px 0 72px; }
+    .hero h1 {
+      font-size: clamp(38px, 6.4vw, 64px);
+      font-weight: 700;
+      line-height: 1.08;
+      letter-spacing: -0.015em;
+      max-width: 16ch;
+    }
+    .hero-lede { font-size: 21px; color: var(--slate); margin: 22px 0 32px; max-width: 34ch; }
+    .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+    .hero-small { font-size: 16px; color: var(--slate); margin-top: 18px; }
+
+    /* entering the app */
+    .enter-veil {
+      position: fixed; inset: 0; z-index: 50;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--paper); opacity: 0; pointer-events: none;
+    }
+    .enter-veil[hidden] { display: none; }
+    .enter-veil img { width: 128px; height: 128px; object-fit: contain; opacity: 0; }
+
+    /* sections */
+    section.band { border-top: 1px solid var(--rule); padding: 72px 0; }
+    .band h2 { font-size: clamp(30px, 4vw, 40px); font-weight: 700; line-height: 1.15; letter-spacing: -0.01em; max-width: 22ch; }
+    .band .intro { color: var(--slate); font-size: 20px; margin-top: 14px; max-width: 60ch; }
+    .split { display: grid; grid-template-columns: 1fr; gap: 24px 56px; }
+    @media (min-width: 860px) { .split { grid-template-columns: 0.8fr 1.2fr; } }
+
+    .story p { max-width: 60ch; }
+    .story p + p { margin-top: 16px; }
+    .story .sign { color: var(--slate); font-size: 17px; }
+
+    .who { list-style: none; display: grid; grid-template-columns: 1fr; border-top: 1px solid var(--rule); }
+    @media (min-width: 640px) { .who { grid-template-columns: 1fr 1fr; column-gap: 32px; } }
+    .who li { padding: 18px 0; border-bottom: 1px solid var(--rule); }
+    .who strong { display: block; font-size: 20px; }
+    .who span { color: var(--slate); font-size: 17px; }
+
+    .features { list-style: none; display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 40px; }
+    @media (min-width: 640px) { .features { grid-template-columns: 1fr 1fr; } }
+    @media (min-width: 980px) { .features { grid-template-columns: 1fr 1fr 1fr; } }
+    .features li {
+      background: var(--cell);
+      border: 1.5px solid var(--rule);
+      border-radius: var(--r-box);
+      padding: 22px;
+    }
+    .features h3 { display: flex; align-items: center; gap: 12px; font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+    .features p { color: var(--slate); font-size: 17px; }
+
+    .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin: 32px 0 24px; }
+    .tab {
+      min-height: 52px; padding: 0 20px;
+      background: var(--cell); border: 1.5px solid var(--edge); border-radius: var(--r-btn);
+      font-size: 18px; font-weight: 600;
+    }
+    .tab:hover { border-color: var(--ink); }
+    .tab[aria-selected="true"] { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .steps { list-style: none; counter-reset: step; max-width: 640px; }
+    .steps li { counter-increment: step; display: grid; grid-template-columns: 44px 1fr; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--rule); }
+    .steps li::before {
+      content: counter(step);
+      display: flex; align-items: center; justify-content: center;
+      width: 40px; height: 40px; border: 1.5px solid var(--ink); border-radius: 50%;
+      font-weight: 700; font-size: 18px;
+    }
+    .steps strong { display: block; }
+    .steps span { color: var(--slate); font-size: 17px; }
+
+    .faq { max-width: 760px; margin-top: 32px; border-top: 1px solid var(--rule); }
+    .faq details { border-bottom: 1px solid var(--rule); }
+    .faq summary {
+      display: flex; justify-content: space-between; align-items: center; gap: 16px;
+      min-height: 64px; padding: 14px 0;
+      font-size: 19px; font-weight: 700; cursor: pointer; list-style: none;
+    }
+    .faq summary::-webkit-details-marker { display: none; }
+    .faq summary .i { transition: transform 150ms ease-out; }
+    .faq details[open] summary .i { transform: rotate(180deg); }
+    .faq details p { color: var(--slate); padding: 0 0 20px; max-width: 64ch; }
+
+    .closing { border-top: 1px solid var(--rule); padding: 72px 0; }
+    .closing .wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 24px; }
+    .closing h2 { font-size: clamp(28px, 4vw, 36px); line-height: 1.2; }
+
+    footer { border-top: 1px solid var(--rule); padding: 40px 0 56px; font-size: 17px; }
+    .foot-links { display: flex; flex-wrap: wrap; gap: 12px 28px; margin-bottom: 20px; }
+    .foot-links a { font-weight: 600; }
+    .foot-note { color: var(--slate); font-size: 16px; max-width: 70ch; }
+  </style>
+</head>
+<body>
+
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="index.html">
+      <img src="icons/sapling.png" alt="" width="36" height="36">
+      TouchTalk
+    </a>
+    <nav class="site-nav" aria-label="Page">
+      <a href="#features">Features</a>
+      <a href="#install">Install</a>
+      <a href="#questions">Questions</a>
+      <a class="btn btn-solid" href="app.html">Open the app</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <div>
+        <h1>Tap the words. TouchTalk says them out loud.</h1>
+        <p class="hero-lede">A free AAC app for people who find speaking hard. It runs in the browser on a phone, tablet, or computer, with no account and no cost.</p>
+        <div class="hero-actions">
+          <a class="btn btn-solid" href="app.html">Open the app</a>
+          <a class="btn btn-line" href="#install">Install on a phone</a>
+        </div>
+        <p class="hero-small">Nothing you type or say is sent anywhere. It all stays on the device.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap split">
+      <h2>Why I made it</h2>
+      <div class="story">
+        <p>I started TouchTalk after seeing how hard it was for people with disabilities, including my brother, to communicate. The AAC apps I found cost money, needed an account, or were clunky to set up.</p>
+        <p>I tested it with someone who has cerebral palsy, and their feedback decided a lot of how it works: the button sizes, how the categories are grouped, and keeping the Help button reachable on every screen. My little brother helps me test it too.</p>
+        <p class="sign">The developer, a high school junior</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap split">
+      <div>
+        <h2>Who uses it</h2>
+        <p class="intro">AAC stands for augmentative and alternative communication: any tool that helps a person communicate when speech is hard.</p>
+      </div>
+      <ul class="who">
+        <li><strong>Cerebral palsy</strong><span>Large buttons, hold to select, and ignore repeat taps for limited hand control.</span></li>
+        <li><strong>ALS and MND</strong><span>Works with a keyboard or switch that sends key presses.</span></li>
+        <li><strong>Autism</strong><span>Words stay in the same place, so the layout can be learned.</span></li>
+        <li><strong>Aphasia</strong><span>Pictures and ready-made phrases reduce the need to find each word.</span></li>
+        <li><strong>Selective mutism</strong><span>A way to answer when speaking out loud is not possible.</span></li>
+        <li><strong>After surgery or intubation</strong><span>Short-term communication in hospital or at home.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="band" id="features">
+    <div class="wrap">
+      <h2>What it does</h2>
+      <ul class="features">
+        <li>
+          <h3><svg class="i" viewBox="0 0 24 24" aria-hidden="true" data-icon="volume-2"></svg>Speaks out loud</h3>
+          <p>Each word can be spoken as you tap it, or build a full sentence and press Speak. Change the voice, speed, and pitch.</p>
+        </li>
+        <li>
+          <h3><svg class="i" viewBox="0 0 24 24" aria-hidden="true" data-icon="layout-grid"></svg>Core word board</h3>
+          <p>60 common words in fixed places, colour coded by word type with the Fitzgerald Key used in many AAC systems.</p>
+        </li>
+        <li>
+          <h3><svg class="i" viewBox="0 0 24 24" aria-hidden="true" data-icon="bookmark"></svg>Quick phrases</h3>
+          <p>Whole sentences such as "I need help, please" in one tap. Add your own.</p>
+        </li>
+        <li>
+          <h3><svg class="i" viewBox="0 0 24 24" aria-hidden="true" data-icon="triangle-alert"></svg>Help button</h3>
+          <p>Always at the top of the screen. One press says "Help. I need assistance now."</p>
+        </li>
+        <li>
+          <h3><svg class="i" viewBox="0 0 24 24" aria-hidden="true" data-icon="mic"></svg>Your own words and voice</h3>
+          <p>Add categories and words, use real photos, and record a family member's voice for names.</p>
+        </li>
+        <li>
+          <h3><svg class="i" viewBox="0 0 24 24" aria-hidden="true" data-icon="hand"></svg>Settings for motor needs</h3>
+          <p>Hold to select, ignore repeat taps, and four button sizes. Nothing on screen flashes.</p>
+        </li>
+        <li>
+          <h3><svg class="i" viewBox="0 0 24 24" aria-hidden="true" data-icon="keyboard"></svg>Type to speak</h3>
+          <p>For people who can spell, with next-word suggestions that learn from what you say.</p>
+        </li>
+        <li>
+          <h3><svg class="i" viewBox="0 0 24 24" aria-hidden="true" data-icon="smartphone"></svg>Works offline</h3>
+          <p>Install it to the home screen and it keeps working without internet.</p>
+        </li>
+        <li>
+          <h3><svg class="i" viewBox="0 0 24 24" aria-hidden="true" data-icon="download"></svg>Backup to a file</h3>
+          <p>Save your words and settings to a file and open it on a new device.</p>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="band" id="install">
+    <div class="wrap">
+      <h2>Install on your device</h2>
+      <p class="intro">Installing is optional. It puts TouchTalk on the home screen and lets it work without internet.</p>
+      <div class="tabs" role="tablist" aria-label="Device">
+        <button class="tab" role="tab" id="tab-ios" aria-controls="steps-ios" aria-selected="true">iPhone or iPad</button>
+        <button class="tab" role="tab" id="tab-android" aria-controls="steps-android" aria-selected="false" tabindex="-1">Android</button>
+        <button class="tab" role="tab" id="tab-web" aria-controls="steps-web" aria-selected="false" tabindex="-1">Computer</button>
+      </div>
+      <ol class="steps" id="steps-ios" role="tabpanel" aria-labelledby="tab-ios">
+        <li><div><strong>Open TouchTalk in Safari</strong><span>Other browsers on iPhone cannot add it to the home screen.</span></div></li>
+        <li><div><strong>Press Share</strong><span>The square with an arrow pointing up, at the bottom of the screen.</span></div></li>
+        <li><div><strong>Press Add to Home Screen, then Add</strong><span>TouchTalk now opens from the home screen like any other app.</span></div></li>
+      </ol>
+      <ol class="steps" id="steps-android" role="tabpanel" aria-labelledby="tab-android" hidden>
+        <li><div><strong>Open TouchTalk in Chrome</strong><span>Use the Open the app button on this page.</span></div></li>
+        <li><div><strong>Open the menu</strong><span>The three dots in the top right corner.</span></div></li>
+        <li><div><strong>Press Install app</strong><span>On some phones it is called Add to Home screen.</span></div></li>
+      </ol>
+      <ol class="steps" id="steps-web" role="tabpanel" aria-labelledby="tab-web" hidden>
+        <li><div><strong>Open TouchTalk in Chrome or Edge</strong><span>It also works in Safari and Firefox without installing.</span></div></li>
+        <li><div><strong>Select the install icon in the address bar</strong><span>It looks like a screen with a down arrow.</span></div></li>
+        <li><div><strong>Confirm Install</strong><span>TouchTalk opens in its own window.</span></div></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="band" id="questions">
+    <div class="wrap">
+      <h2>Questions</h2>
+      <div class="faq">
+        <details>
+          <summary>Does TouchTalk collect any data?<svg class="i" viewBox="0 0 24 24" aria-hidden="true" data-icon="chevron-down"></svg></summary>
+          <p>No. There are no analytics, no tracking, and no server. Words, phrases, recordings, and settings are stored in the browser on your device and are never sent anywhere.</p>
+        </details>
+        <details>
+          <summary>Does it work without internet?<svg class="i" viewBox="0 0 24 24" aria-hidden="true" data-icon="chevron-down"></svg></summary>
+          <p>Yes, after the first visit. Speech uses the voice built into your device, so it does not need a connection either.</p>
+        </details>
+        <details>
+          <summary>Which languages does it speak?<svg class="i" viewBox="0 0 24 24" aria-hidden="true" data-icon="chevron-down"></svg></summary>
+          <p>Any language your device has a voice for. The app's menus are in English. You can add words in any language, or record your own voice for them.</p>
+        </details>
+        <details>
+          <summary>Can I add my own words and pictures?<svg class="i" viewBox="0 0 24 24" aria-hidden="true" data-icon="chevron-down"></svg></summary>
+          <p>Yes. In the app, open Edit. You can add categories, words, and phrases, give each one a photo or an icon, and record a voice for it.</p>
+        </details>
+        <details>
+          <summary>Does it work with switches or eye tracking?<svg class="i" viewBox="0 0 24 24" aria-hidden="true" data-icon="chevron-down"></svg></summary>
+          <p>Every button can be reached with the Tab key, arrow keys move around the word board, and the selected button has a thick yellow and black outline. Switches and eye-gaze systems that send key presses or mouse clicks will work. Automatic switch scanning is planned.</p>
+        </details>
+        <details>
+          <summary>Is this a medical device?<svg class="i" viewBox="0 0 24 24" aria-hidden="true" data-icon="chevron-down"></svg></summary>
+          <p>No. TouchTalk is a communication aid. It is not certified by the FDA or any other regulator and does not replace an assessment by a speech-language pathologist.</p>
+        </details>
+        <details>
+          <summary>Why is it free?<svg class="i" viewBox="0 0 24 24" aria-hidden="true" data-icon="chevron-down"></svg></summary>
+          <p>Dedicated AAC devices can cost thousands of dollars. TouchTalk is a personal project with no ads and nothing to sell.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <section class="closing">
+    <div class="wrap">
+      <h2>Open TouchTalk in your browser now.</h2>
+      <a class="btn btn-solid" href="app.html">Open the app</a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-links">
+      <a href="app.html">Open the app</a>
+      <a href="review.html">Send feedback</a>
+      <a href="mailto:abza2030@gmail.com">Email the developer</a>
+    </div>
+    <p class="foot-note">TouchTalk is not a medical device and does not give medical advice. For a full AAC assessment, talk to a speech-language pathologist.</p>
+  </div>
+</footer>
+
+<div class="enter-veil" id="enterVeil" aria-hidden="true" hidden>
+  <img src="icons/sapling.png" alt="" decoding="async">
+</div>
+
+<script src="icons.js"></script>
+<script>
+  hydrateIcons();
+
+  // install tabs
+  const tabs = [...document.querySelectorAll('.tab')];
+  function selectTab(tab) {
+    tabs.forEach(t => {
+      const on = t === tab;
+      t.setAttribute('aria-selected', String(on));
+      t.tabIndex = on ? 0 : -1;
+      document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+    });
+  }
+  tabs.forEach((t, i) => {
+    t.addEventListener('click', () => selectTab(t));
+    t.addEventListener('keydown', e => {
+      const d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+      if (!d) return;
+      const next = tabs[(i + d + tabs.length) % tabs.length];
+      selectTab(next); next.focus();
+    });
+  });
+  // open the app
+  (function () {
+    const veil = document.getElementById('enterVeil');
+    const mark = veil.querySelector('img');
+    const EASE_OUT_EXPO = 'cubic-bezier(0.16, 1, 0.3, 1)';
+    function animationsOn() {
+      try {
+        const s = JSON.parse(localStorage.getItem('tt_settings') || '{}');
+        return !(s.accessSettings && s.accessSettings.animateScreens === false);
+      } catch (e) { return true; }
+    }
+    document.querySelectorAll('a[href="app.html"]').forEach(a => {
+      a.addEventListener('click', e => {
+        if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+        if (!veil.animate || !animationsOn()) return;
+        e.preventDefault();
+        const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+        veil.hidden = false;
+        veil.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 220, easing: EASE_OUT_EXPO, fill: 'forwards' });
+        mark.animate(reduce
+          ? [{ opacity: 0 }, { opacity: 1 }]
+          : [{ opacity: 0, transform: 'scale(0.7)' }, { opacity: 1, transform: 'scale(1)' }],
+          { duration: 700, delay: 80, easing: EASE_OUT_EXPO, fill: 'forwards' });
+        try { sessionStorage.setItem('tt_entering', '1'); } catch (err) {}
+        setTimeout(() => { location.href = a.href; }, 820);
+      });
+    });
+    addEventListener('pageshow', () => {
+      veil.getAnimations().concat(mark.getAnimations()).forEach(x => x.cancel());
+      veil.hidden = true;
+    });
+  })();
+
+  if (/android/i.test(navigator.userAgent)) selectTab(document.getElementById('tab-android'));
+  else if (!/iphone|ipad|ipod/i.test(navigator.userAgent) && !(navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) selectTab(document.getElementById('tab-web'));
+</script>
+</body>
+</html>

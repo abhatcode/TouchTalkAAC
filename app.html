@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="TouchTalk">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#F2F5F1">
+  <meta name="description" content="TouchTalk is a free AAC app. Tap words to build a message and have it spoken aloud.">
+  <title>TouchTalk AAC</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="preload" href="fonts/lexend-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="style.css">
+  <script>
+    // Before first paint: apply the saved theme and start under the sapling
+    // veil, so opening the app never flashes (script.js plays the rest).
+    (function () {
+      var h = document.documentElement;
+      try { if (JSON.parse(localStorage.getItem('tt_settings') || '{}').isDarkMode) h.classList.add('dark'); } catch (e) {}
+      // Every time the app opens, it starts under the sapling veil (unless the
+      // "Animate screen changes" setting is off). From the homepage the sapling
+      // is already grown, so the app carries on from there.
+      var anim = true;
+      try { var st = JSON.parse(localStorage.getItem('tt_settings') || '{}'); anim = !(st.accessSettings && st.accessSettings.animateScreens === false); } catch (e) {}
+      if (anim) h.classList.add('entering');
+      try { if (sessionStorage.getItem('tt_entering')) { sessionStorage.removeItem('tt_entering'); h.classList.add('from-home'); } } catch (e) {}
+    })();
+  </script>
+</head>
+<body class="view-home">
+
+  <header class="app-header" role="banner">
+    <a class="app-brand" href="index.html" aria-label="TouchTalk home page">
+      <img class="brand-mark mark-light" src="icons/sapling.png" alt="" width="36" height="36">
+      <img class="brand-mark mark-dark" src="icons/sapling-light.png" alt="" width="36" height="36">
+      <span class="app-title">TouchTalk</span>
+    </a>
+    <div class="header-actions">
+      <button class="head-btn" id="searchToggle" aria-expanded="false" aria-controls="searchBarWrap">
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true" data-icon="search"></svg>
+        <span>Search</span>
+      </button>
+      <button class="head-btn help-btn" onclick="emergency()" aria-label="Help: speak I need assistance now">
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true" data-icon="triangle-alert"></svg>
+        <span>Help</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="search-bar-wrap" id="searchBarWrap" aria-hidden="true">
+    <div class="search-bar">
+      <svg class="i search-icon-inline" viewBox="0 0 24 24" aria-hidden="true" data-icon="search"></svg>
+      <input type="search" id="searchInput" class="search-input" placeholder="Search words and phrases" autocomplete="off" autocorrect="off" spellcheck="false" aria-label="Search words and phrases">
+      <button class="search-clear-btn" id="searchClearBtn" aria-label="Clear search" tabindex="-1">
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true" data-icon="x"></svg>
+      </button>
+    </div>
+  </div>
+
+  <section class="message-panel" id="actionBar" aria-label="Message">
+    <div class="message-window" id="output" role="log" aria-label="Message" aria-live="polite" tabindex="0">
+      <span class="output-placeholder" id="outputPlaceholder">Tap words to build a message</span>
+    </div>
+    <div class="message-tools">
+      <button class="speak-btn" onclick="speakText()" aria-label="Speak the message">
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true" data-icon="volume-2"></svg>
+        <span>Speak</span>
+      </button>
+      <button class="tool-btn" onclick="backspaceWord()" aria-label="Delete last word">
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true" data-icon="delete"></svg>
+        <span>Delete word</span>
+      </button>
+      <button class="tool-btn" onclick="clearText()" aria-label="Clear the whole message">
+        <svg class="i" viewBox="0 0 24 24" aria-hidden="true" data-icon="x"></svg>
+        <span>Clear all</span>
+      </button>
+    </div>
+    <div class="predict-wrap">
+      <span class="predict-lead" id="predictLead">Next word</span>
+      <div class="predict-row" id="predictRow" role="group" aria-labelledby="predictLead"></div>
+    </div>
+  </section>
+
+  <main class="app-main" id="appMain">
+
+    <section class="view view-panel" id="view-home" aria-label="Talk">
+
+      <div class="search-results-area" id="searchResultsArea" aria-live="polite" aria-label="Search results" style="display:none"></div>
+
+      <div id="talkContent">
+        <nav class="cat-nav" id="catNav" aria-label="Categories">
+          <div class="cat-nav-scroll"></div>
+        </nav>
+        <div class="symbol-grid" id="symbolGrid" role="grid" aria-label="Words"></div>
+      </div>
+    </section>
+
+    <section class="view view-panel" id="view-type" aria-label="Type" hidden>
+      <div class="view-header">
+        <h1 class="view-title">Type</h1>
+        <p class="view-sub">Type a message and press Speak.</p>
+      </div>
+      <label for="typeArea" class="sr-only">Message to speak</label>
+      <textarea id="typeArea" class="type-area" rows="4" placeholder="Start typing" autocomplete="off" autocorrect="on"></textarea>
+      <div class="predict-row type-predict" id="typePredict" role="group" aria-label="Suggested words"></div>
+      <div class="type-controls">
+        <button class="tool-btn type-clear" onclick="typeClear()">
+          <svg class="i" viewBox="0 0 24 24" aria-hidden="true" data-icon="x"></svg>
+          <span>Clear all</span>
+        </button>
+        <button class="tool-btn type-save" onclick="typeSaveAsPhrase()">
+          <svg class="i" viewBox="0 0 24 24" aria-hidden="true" data-icon="bookmark"></svg>
+          <span>Save as phrase</span>
+        </button>
+        <button class="speak-btn type-speak" onclick="typeSpeak()" aria-label="Speak typed message">
+          <svg class="i" viewBox="0 0 24 24" aria-hidden="true" data-icon="volume-2"></svg>
+          <span>Speak</span>
+        </button>
+      </div>
+    </section>
+
+    <section class="view view-panel" id="view-wordbanks" aria-label="Edit words" hidden>
+      <div class="view-header">
+        <h1 class="view-title">Edit words</h1>
+        <p class="view-sub">Add or remove categories, words, and phrases. Changes are saved on this device.</p>
+      </div>
+      <div class="manage-list">
+        <button class="manage-row" onclick="openAddSymbolModal()">
+          <svg class="i" viewBox="0 0 24 24" aria-hidden="true" data-icon="plus"></svg>
+          <span class="manage-text"><span class="manage-label">Add a word</span><span class="manage-desc">Put a new button in any category</span></span>
+        </button>
+        <button class="manage-row" onclick="openAddPhraseModal()">
+          <svg class="i" viewBox="0 0 24 24" aria-hidden="true" data-icon="bookmark"></svg>
+          <span class="manage-text"><span class="manage-label">Add a phrase</span><span class="manage-desc">Save a full sentence to Quick Phrases</span></span>
+        </button>
+        <button class="manage-row" onclick="openAddCategoryModal()">
+          <svg class="i" viewBox="0 0 24 24" aria-hidden="true" data-icon="folder-plus"></svg>
+          <span class="manage-text"><span class="manage-label">Add a category</span><span class="manage-desc">Make a new group of words</span></span>
+        </button>
+      </div>
+      <h2 class="section-heading">Remove</h2>
+      <div class="manage-list">
+        <button class="manage-row" onclick="openDeleteSymbolModal()">
+          <svg class="i" viewBox="0 0 24 24" aria-hidden="true" data-icon="trash-2"></svg>
+          <span class="manage-text"><span class="manage-label">Remove words</span><span class="manage-desc">Delete single buttons from a category</span></span>
+        </button>
+        <button class="manage-row" onclick="openDeleteCategoryModal()">
+          <svg class="i" viewBox="0 0 24 24" aria-hidden="true" data-icon="trash-2"></svg>
+          <span class="manage-text"><span class="manage-label">Remove a category</span><span class="manage-desc">Delete a category you made, with its words</span></span>
+        </button>
+      </div>
+    </section>
+
+    <section class="view view-panel" id="view-history" aria-label="History" hidden>
+      <div class="view-header">
+        <h1 class="view-title">History</h1>
+        <p class="view-sub">Messages you have spoken. Press Speak to say one again.</p>
+      </div>
+      <div id="historyList" class="history-list" aria-live="polite"></div>
+    </section>
+
+    <section class="view view-panel" id="view-settings" aria-label="Settings" hidden>
+      <div class="view-header">
+        <h1 class="view-title">Settings</h1>
+      </div>
+
+      <div class="settings-card">
+        <h2 class="settings-card-title">Voice</h2>
+        <div class="settings-field">
+          <label class="settings-label" for="voiceSelect">Voice</label>
+          <select class="settings-select" id="voiceSelect"></select>
+        </div>
+        <div class="settings-field">
+          <label class="settings-label" for="voiceSpeed">Speed <span class="settings-value" id="speedVal">0.85×</span></label>
+          <input type="range" class="settings-slider" id="voiceSpeed" min="0.5" max="2.0" step="0.05" value="0.85">
+          <div class="slider-ends" aria-hidden="true"><span>Slower</span><span>Faster</span></div>
+        </div>
+        <div class="settings-field">
+          <label class="settings-label" for="voicePitch">Pitch <span class="settings-value" id="pitchVal">1.00×</span></label>
+          <input type="range" class="settings-slider" id="voicePitch" min="0.5" max="2.0" step="0.05" value="1.0">
+          <div class="slider-ends" aria-hidden="true"><span>Lower</span><span>Higher</span></div>
+        </div>
+        <button class="settings-action-btn" onclick="testVoice()">
+          <svg class="i" viewBox="0 0 24 24" aria-hidden="true" data-icon="volume-2"></svg>
+          <span>Test voice</span>
+        </button>
+      </div>
+
+      <div class="settings-card">
+        <h2 class="settings-card-title">Touch and access</h2>
+        <div class="settings-row">
+          <span class="settings-label" id="speakWordLabel">Say each word when tapped</span>
+          <button class="toggle-switch" id="speakWordToggle" role="switch" aria-checked="true" aria-labelledby="speakWordLabel" onclick="toggleSpeakEachWord()">
+            <span class="toggle-knob"></span>
+          </button>
+        </div>
+        <div class="settings-field">
+          <label class="settings-label" for="buttonSize">Button size</label>
+          <select class="settings-select" id="buttonSize">
+            <option value="small">Small: more words on screen</option>
+            <option value="medium" selected>Medium</option>
+            <option value="large">Large: easier to tap</option>
+            <option value="xl">Extra large</option>
+          </select>
+        </div>
+        <div class="settings-field">
+          <label class="settings-label" for="holdDuration">Hold to select</label>
+          <p class="settings-hint">A button only works after it is held down. This stops brushes and accidental taps.</p>
+          <select class="settings-select" id="holdDuration">
+            <option value="0" selected>Off: tap normally</option>
+            <option value="300">Short hold (0.3 s)</option>
+            <option value="600">Medium hold (0.6 s)</option>
+            <option value="1000">Long hold (1 s)</option>
+          </select>
+        </div>
+        <div class="settings-field">
+          <label class="settings-label" for="debounceTime">Ignore repeat taps</label>
+          <p class="settings-hint">After a tap, ignore other taps for a moment. Helps with tremors.</p>
+          <select class="settings-select" id="debounceTime">
+            <option value="0" selected>Off</option>
+            <option value="300">Short (0.3 s)</option>
+            <option value="700">Medium (0.7 s)</option>
+            <option value="1500">Long (1.5 s)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <h2 class="settings-card-title">Display</h2>
+        <div class="settings-row">
+          <span class="settings-label" id="darkLabel">Dark background</span>
+          <button class="toggle-switch" id="darkToggle" role="switch" aria-checked="false" aria-labelledby="darkLabel" onclick="toggleDarkMode()">
+            <span class="toggle-knob"></span>
+          </button>
+        </div>
+        <div class="settings-row">
+          <span class="settings-label" id="screenAnimLabel">Animate screen changes</span>
+          <button class="toggle-switch" id="screenAnimToggle" role="switch" aria-checked="true" aria-labelledby="screenAnimLabel" onclick="toggleScreenAnimation()">
+            <span class="toggle-knob"></span>
+          </button>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <h2 class="settings-card-title">Backup</h2>
+        <p class="settings-hint">Save your words, phrases, and settings to a file. Open that file on another device to copy everything over.</p>
+        <div class="settings-btn-row">
+          <button class="settings-action-btn" onclick="exportBackup()">
+            <svg class="i" viewBox="0 0 24 24" aria-hidden="true" data-icon="download"></svg>
+            <span>Save backup</span>
+          </button>
+          <button class="settings-action-btn" onclick="document.getElementById('importFile').click()">
+            <svg class="i" viewBox="0 0 24 24" aria-hidden="true" data-icon="upload"></svg>
+            <span>Open backup</span>
+          </button>
+        </div>
+        <input type="file" id="importFile" accept=".json,application/json" style="display:none" aria-label="Open backup file">
+      </div>
+
+      <div class="settings-card">
+        <h2 class="settings-card-title">Install</h2>
+        <p class="settings-hint" id="installHint">Install TouchTalk on this device to use it full screen and without internet.</p>
+        <button class="settings-action-btn" id="installBtn" onclick="installApp()">Install app</button>
+      </div>
+
+      <div class="settings-info">
+        <p>TouchTalk 2.4. Free to use. Nothing you type or say leaves this device.</p>
+        <p><a href="index.html" class="settings-link">About TouchTalk</a> <a href="review.html" class="settings-link">Send feedback</a></p>
+      </div>
+    </section>
+
+  </main>
+
+  <nav class="bottom-nav" id="bottomNav" aria-label="Main">
+    <button class="nav-tab active" data-view="home" aria-current="page">
+      <svg class="i" viewBox="0 0 24 24" aria-hidden="true" data-icon="layout-grid"></svg>
+      <span class="nav-label">Talk</span>
+    </button>
+    <button class="nav-tab" data-view="type">
+      <svg class="i" viewBox="0 0 24 24" aria-hidden="true" data-icon="keyboard"></svg>
+      <span class="nav-label">Type</span>
+    </button>
+    <button class="nav-tab" data-view="wordbanks">
+      <svg class="i" viewBox="0 0 24 24" aria-hidden="true" data-icon="pencil"></svg>
+      <span class="nav-label">Edit</span>
+    </button>
+    <button class="nav-tab" data-view="history">
+      <svg class="i" viewBox="0 0 24 24" aria-hidden="true" data-icon="history"></svg>
+      <span class="nav-label">History</span>
+    </button>
+    <button class="nav-tab" data-view="settings">
+      <svg class="i" viewBox="0 0 24 24" aria-hidden="true" data-icon="settings"></svg>
+      <span class="nav-label">Settings</span>
+    </button>
+  </nav>
+
+  <div class="modal-overlay" id="modalOverlay" aria-hidden="true">
+    <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <header class="modal-header">
+        <h2 class="modal-title" id="modalTitle">Title</h2>
+        <button class="modal-close" id="modalClose" aria-label="Close">
+          <svg class="i" viewBox="0 0 24 24" aria-hidden="true" data-icon="x"></svg>
+        </button>
+      </header>
+      <div class="modal-body" id="modalBody"></div>
+      <footer class="modal-footer" id="modalFooter"></footer>
+    </div>
+  </div>
+
+  <script src="icons.js"></script>
+  <script src="script.js"></script>
+  <div class="screen-veil" id="screenVeil" aria-hidden="true" hidden>
+    <span class="screen-veil-art" id="screenVeilMark">
+      <img class="screen-veil-mark mark-light" src="icons/sapling.png" alt="" decoding="async">
+      <img class="screen-veil-mark mark-dark" src="icons/sapling-light.png" alt="" decoding="async">
+    </span>
+  </div>
+
+</body>
+</html>
